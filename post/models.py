@@ -1,11 +1,9 @@
 from django.db import models
 from django.db.models.signals import pre_save
 from django.utils.text import slugify
-
-
-# Create your models here.
 from article.utils import unique_slug_generator
 
+# Create your models here.
 
 class Article(models.Model):
     title = models.CharField(max_length=128)
