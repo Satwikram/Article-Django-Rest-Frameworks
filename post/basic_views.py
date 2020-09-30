@@ -5,8 +5,6 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from .models import Article
 from .serializers import ArticleSerializers
-from rest_framework.response import Response
-from rest_framework import status
 
 # Create your views here.
 @api_view(['GET', 'POST'])
@@ -15,15 +13,16 @@ def article_list(request):
     if request.method == 'GET':
         articles = Article.objects.all()
         serializer = ArticleSerializers(articles, many = True)
-        return Response(serializer.data)
+        return JsonResponse(serializer.data, safe = False)
 
     elif request.method == 'POST':
-        serializer = ArticleSerializers(data = request.data)
+        data = JSONParser().parse(request)
+        serializer = ArticleSerializers(data = data)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status = status.HTTP_201_CREATED)
-        return JsonResponse(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(serializer.data, status = 201)
+        return JsonResponse(serializer.errors, status = 400)
 
 @csrf_exempt
 def article_detail(request, pk):
@@ -49,4 +48,3 @@ def article_detail(request, pk):
     elif request.method == 'DELETE':
         article.delete()
         return HttpResponse(status = 204)
-
