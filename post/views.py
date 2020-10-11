@@ -28,15 +28,31 @@ class ArticleDetailsAPIView(APIView):
 
     def get_object(self, id):
         try:
-           return Article.objects.get(id = id)
+            article = Article.objects.get(id = id)
+            comment = Comment.objects.filter(post_id = id)
+            print(len(comment))
+            n = len(comment)
+            comment1 = list(Comment.objects.filter(post_id = id).values('comment'))
+            print("Comment is:",comment)
+            print("Comment is:", comment1)
+            print("Article is:",article)
+            return article, comment1
 
         except Article.DoesNotExist:
             return HttpResponse(status=status.HTTP_404_NOT_FOUND)
 
     def get(self, request, id):
-        article = self.get_object(id)
-        serializer = ArticleSerializers(article)
-        return Response(serializer.data)
+        try:
+            article, comment1 = self.get_object(id)
+            serializer = ArticleSerializers(article)
+            print("Its worked")
+            return Response({
+                'post':serializer.data,
+                'comment': comment1
+            })
+        except:
+            return HttpResponse(status = status.HTTP_404_NOT_FOUND)
+
 
     def put(self, request, id):
         article = self.get_object(id)

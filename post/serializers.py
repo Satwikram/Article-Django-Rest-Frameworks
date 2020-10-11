@@ -21,5 +21,6 @@ class CommentSerializers(serializers.ModelSerializer):
         fields = [
             'id',
             'post',
-            'comment'
+            'comment',
+            'date'
         ]
