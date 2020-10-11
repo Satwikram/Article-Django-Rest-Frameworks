@@ -24,3 +24,11 @@ def rl_pre_save_receiver(sender, instance, *args, **kwargs):
 
 pre_save.connect(rl_pre_save_receiver, sender = Article)
 
+
+class Comment(models.Model):
+    post = models.ForeignKey(Article, related_name = "User_Comment", on_delete = models.CASCADE)
+    comment = models.TextField()
+    date = models.DateTimeField(auto_now_add = True, blank = True, null = True)
+
+    def __str__(self):
+        return self.post
