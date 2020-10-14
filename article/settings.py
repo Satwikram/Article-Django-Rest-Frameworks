@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'post.apps.PostConfig',
     'postgen.apps.PostgenConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
