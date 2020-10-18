@@ -15,11 +15,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from article.settings import EMAIL_HOST_USER
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.template.loader import render_to_string, get_template
 from django.template import Context
-
-
 
 
 class ArticleAPIView(APIView):
@@ -82,8 +80,8 @@ class ArticleDetailsAPIView(APIView):
         return Response(status = status.HTTP_204_NO_CONTENT)
 
 
-def push_notify(post, comment):
-
+def push_notify(comment):
+    """
     beams_client = PushNotifications(
         instance_id='YOUR_INSTANCE_ID_HERE',
         secret_key='YOUR_SECRET_KEY_HERE',
@@ -105,8 +103,15 @@ def push_notify(post, comment):
             }
         }
     )
+    """
+    subject = 'Commented!'
+    recepient = 'kushal.h1999@gmail.com'
+    body = str(comment)
+    print(body)
 
-    print(response['publishId'])
+    send_mail(subject, body, EMAIL_HOST_USER, [recepient], fail_silently=False)
+
+    #print(response['publishId'])
 
 class CommentAPIView(APIView):
 
@@ -120,7 +125,8 @@ class CommentAPIView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            #push_notify()
+            print(serializer.data)
+            push_notify(serializer.data)
             return Response(serializer.data, status = status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
