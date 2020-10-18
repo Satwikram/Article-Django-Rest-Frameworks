@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated
-
+from pusher_push_notifications import PushNotifications
 from .models import Article, Comment
 from .serializers import ArticleSerializers, CommentSerializers
 from rest_framework.response import Response
@@ -74,6 +74,33 @@ class ArticleDetailsAPIView(APIView):
         article.delete()
         return Response(status = status.HTTP_204_NO_CONTENT)
 
+
+def push_notify(post, comment):
+
+    beams_client = PushNotifications(
+        instance_id='YOUR_INSTANCE_ID_HERE',
+        secret_key='YOUR_SECRET_KEY_HERE',
+    )
+
+    response = beams_client.publish_to_interests(
+        interests=['hello'],
+        publish_body={
+            'apns': {
+                'aps': {
+                    'alert': 'Someone Commented'
+                }
+            },
+            'fcm': {
+                'notification': {
+                    'title': 'Hello',
+                    'body': str(comment)
+                }
+            }
+        }
+    )
+
+    print(response['publishId'])
+
 class CommentAPIView(APIView):
 
     def get(self, request):
@@ -86,6 +113,7 @@ class CommentAPIView(APIView):
 
         if serializer.is_valid():
             serializer.save()
+            #push_notify()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
@@ -98,3 +126,4 @@ class APIArticleListView(ListAPIView):
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'author', 'text')
+
