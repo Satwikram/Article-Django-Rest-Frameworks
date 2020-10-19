@@ -80,7 +80,7 @@ class ArticleDetailsAPIView(APIView):
         return Response(status = status.HTTP_204_NO_CONTENT)
 
 
-def push_notify(comment):
+def push_notify(post, comment):
     """
     beams_client = PushNotifications(
         instance_id='YOUR_INSTANCE_ID_HERE',
@@ -106,7 +106,7 @@ def push_notify(comment):
     """
     subject = 'Commented!'
     recepient = 'kushal.h1999@gmail.com'
-    body = str(comment)
+    body = str(comment)  + str(post)
     print(body)
 
     send_mail(subject, body, EMAIL_HOST_USER, [recepient], fail_silently=False)
@@ -124,9 +124,14 @@ class CommentAPIView(APIView):
         serializer = CommentSerializers(data = request.data)
 
         if serializer.is_valid():
-            serializer.save()
-            print(serializer.data)
-            push_notify(serializer.data)
+            a = serializer.data.get("post")
+            print("id is",a)
+            post = list(Article.objects.filter(id = a).values('slug'))
+            print("hmm is",post)
+
+        if serializer.is_valid():
+            #serializer.save()
+            push_notify(post, serializer.data)
             return Response(serializer.data, status = status.HTTP_201_CREATED)
         return JsonResponse(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
